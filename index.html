@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline — Live from Salesforce</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0E1620; --panel:#152030; --line:rgba(255,255,255,.09);
+    --ink:#EDEFF2; --ink-dim:#8EA0B3; --amber:#E8A33D; --coral:#E0685A; --teal:#3FC7B0; }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Newsreader',serif;}
+  header{padding:2rem 6vw 1.2rem;border-bottom:1px solid var(--line);}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--teal);}
+  h1{font-size:1.9rem;font-weight:600;margin:.3rem 0;}
+  main{padding:2rem 6vw 3rem;max-width:1000px;margin:0 auto;}
+  #status{font-family:'IBM Plex Mono',monospace;color:var(--ink-dim);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;margin-top:1rem;}
+  th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-dim);padding:.6rem .8rem;border-bottom:1px solid var(--line);}
+  td{padding:.8rem;border-bottom:1px solid var(--line);font-size:.95rem;}
+  .amt{font-family:'IBM Plex Mono',monospace;text-align:right;}
+  .tablewrap{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow-x:auto;}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">LIVE FROM RENDER · PROXYING SALESFORCE</div>
+  <h1>Pipeline — fetched live, right now</h1>
+  <div id="status">Loading from /api/opportunities…</div>
+</header>
+<main>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Account</th><th>Opportunity</th><th>Stage</th><th style="text-align:right">Amount</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</main>
+<script>
+fetch("/api/opportunities")
+  .then(r => { if (!r.ok) throw new Error("API error " + r.status); return r.json(); })
+  .then(deals => {
+    document.getElementById("status").textContent = `Loaded ${deals.length} records live from Salesforce.`;
+    const tbody = document.getElementById("rows");
+    deals.forEach(d => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${d.Account?.Name ?? "—"}</td><td>${d.Name}</td><td>${d.StageName}</td>
+        <td class="amt">$${Number(d.Amount || 0).toLocaleString()}</td>`;
+      tbody.appendChild(tr);
+    });
+  })
+  .catch(err => {
+    document.getElementById("status").textContent = "Error: " + err.message;
+  });
+</script>
+</body>
+</html>
