@@ -3,55 +3,649 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pipeline — Live from Salesforce</title>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Customer account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
 <style>
-  :root{ --bg:#0E1620; --panel:#152030; --line:rgba(255,255,255,.09);
-    --ink:#EDEFF2; --ink-dim:#8EA0B3; --amber:#E8A33D; --coral:#E0685A; --teal:#3FC7B0; }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Newsreader',serif;}
-  header{padding:2rem 6vw 1.2rem;border-bottom:1px solid var(--line);}
-  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--teal);}
-  h1{font-size:1.9rem;font-weight:600;margin:.3rem 0;}
-  main{padding:2rem 6vw 3rem;max-width:1000px;margin:0 auto;}
-  #status{font-family:'IBM Plex Mono',monospace;color:var(--ink-dim);font-size:.85rem;}
-  table{width:100%;border-collapse:collapse;margin-top:1rem;}
-  th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-dim);padding:.6rem .8rem;border-bottom:1px solid var(--line);}
-  td{padding:.8rem;border-bottom:1px solid var(--line);font-size:.95rem;}
-  .amt{font-family:'IBM Plex Mono',monospace;text-align:right;}
-  .tablewrap{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow-x:auto;}
+  :root {
+    --paper: #F2F4F3;
+    --surface: #FFFFFF;
+    --ink: #14222A;
+    --steel: #56666D;
+    --rule: #D3DBD9;
+    --brand: #0B5563;
+    --brand-deep: #073E48;
+    --brand-tint: #E3EEEF;
+    --signal: #D99A12;
+    --ok: #2C7A4C;
+    --alert: #B42318;
+    --radius: 6px;
+    --font: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--brand); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    background: var(--brand-deep);
+    color: #fff;
+  }
+  .topbar-inner {
+    max-width: 1120px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 32px; min-height: 64px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    color: #fff; text-decoration: none;
+    font-stretch: 118%; font-weight: 750; font-size: 1.05rem; letter-spacing: -0.01em;
+  }
+  .brand svg { flex: none; }
+  nav.primary { display: flex; gap: 4px; }
+  nav.primary a {
+    color: rgba(255,255,255,.78); text-decoration: none;
+    padding: 8px 12px; border-radius: var(--radius); font-weight: 500;
+  }
+  nav.primary a:hover { color: #fff; background: rgba(255,255,255,.08); }
+  nav.primary a[aria-current="page"] { color: #fff; box-shadow: inset 0 -2px 0 var(--signal); border-radius: 0; }
+  .who { margin-left: auto; display: flex; align-items: center; gap: 16px; font-size: .9rem; }
+  .who .name { line-height: 1.25; text-align: right; }
+  .who .name small { display: block; color: rgba(255,255,255,.65); font-size: .8rem; }
+  .linkbtn {
+    background: none; border: 1px solid rgba(255,255,255,.3); color: #fff;
+    padding: 6px 12px; border-radius: var(--radius); cursor: pointer; font-size: .85rem;
+  }
+  .linkbtn:hover { border-color: #fff; }
+
+  /* ---------- Page ---------- */
+  main { max-width: 1120px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 {
+    font-stretch: 115%; font-weight: 760; letter-spacing: -0.02em;
+    font-size: clamp(1.9rem, 1.2rem + 2.4vw, 2.75rem); line-height: 1.1; margin: 0;
+  }
+  h2 {
+    font-stretch: 110%; font-weight: 700; letter-spacing: -0.01em;
+    font-size: 1.3rem; margin: 0;
+  }
+  .lede { color: var(--steel); max-width: 60ch; margin: 10px 0 0; font-size: 1.05rem; }
+  .page-head {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    padding-bottom: 32px; border-bottom: 1px solid var(--rule); margin-bottom: 40px;
+  }
+  .section { margin-bottom: 56px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+  .meta { color: var(--steel); font-size: .85rem; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--brand); color: #fff; border: 0; border-radius: var(--radius);
+    padding: 12px 20px; font-weight: 650; text-decoration: none; cursor: pointer;
+  }
+  .btn:hover { background: var(--brand-deep); }
+  .btn[disabled] { opacity: .6; cursor: progress; }
+  .btn.secondary { background: transparent; color: var(--brand); box-shadow: inset 0 0 0 1.5px var(--brand); }
+  .btn.secondary:hover { background: var(--brand-tint); }
+
+  /* ---------- Requests ---------- */
+  .requests { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); }
+  .request {
+    display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr);
+    gap: 24px; padding: 22px 24px; border-top: 1px solid var(--rule);
+  }
+  .request:first-child { border-top: 0; }
+  .request .ref { font-weight: 700; font-stretch: 108%; }
+  .request .product { margin: 2px 0 6px; }
+  .request .facts { color: var(--steel); font-size: .88rem; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  .request.is-new { animation: arrive 1.6s ease-out; }
+  @keyframes arrive { from { background: var(--brand-tint); } to { background: transparent; } }
+
+  /* Status track: a real four-step sequence, so it gets step markers. */
+  .track { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); align-self: center; }
+  .track li { position: relative; padding-top: 22px; font-size: .82rem; color: var(--steel); }
+  .track li::before {
+    content: ""; position: absolute; top: 4px; left: 0; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--rule); z-index: 1;
+  }
+  .track li::after {
+    content: ""; position: absolute; top: 9px; left: 12px; right: 0; height: 2px; background: var(--rule);
+  }
+  .track li:last-child::after { display: none; }
+  .track li.done { color: var(--ink); }
+  .track li.done::before { background: var(--brand); border-color: var(--brand); }
+  .track li.done::after { background: var(--brand); }
+  .track li.current { color: var(--ink); font-weight: 650; }
+  .track li.current::before { border-color: var(--signal); background: var(--signal); box-shadow: 0 0 0 4px rgba(217,154,18,.22); }
+  .track li.flag { color: var(--alert); font-weight: 650; }
+  .track li.flag::before { border-color: var(--alert); background: var(--alert); }
+  .status-note { grid-column: 1 / -1; margin: -8px 0 0; font-size: .85rem; color: var(--steel); }
+
+  .empty {
+    background: var(--surface); border: 1px dashed var(--rule); border-radius: var(--radius);
+    padding: 32px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .empty p { margin: 0; max-width: 52ch; }
+
+  /* ---------- Cases ---------- */
+  .cases { width: 100%; border-collapse: collapse; background: var(--surface); }
+  .cases th { text-align: left; font-size: .8rem; font-weight: 600; color: var(--steel); padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+  .cases td { padding: 14px 16px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .cases tr:last-child td { border-bottom: 0; }
+  .cases .num { color: var(--steel); white-space: nowrap; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; white-space: nowrap; }
+  .pill.open { background: #FCF1D6; color: #7A5300; }
+  .pill.closed { background: #E5EFE8; color: var(--ok); }
+  .prio-high { color: var(--alert); font-weight: 600; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
+
+  /* ---------- Quote form ---------- */
+  .quote-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 40px; align-items: start; }
+  fieldset { border: 0; padding: 0; margin: 0 0 32px; }
+  legend, .label { font-weight: 650; margin-bottom: 10px; display: block; padding: 0; }
+  .hint { color: var(--steel); font-size: .88rem; margin: -6px 0 12px; }
+
+  .products { display: grid; gap: 8px; }
+  .product-opt {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px;
+    background: var(--surface); border: 1.5px solid var(--rule); border-radius: var(--radius);
+    padding: 14px 16px; cursor: pointer;
+  }
+  .product-opt:hover { border-color: var(--steel); }
+  .product-opt:has(input:checked) { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); background: #F7FBFB; }
+  .product-opt input { accent-color: var(--brand); width: 18px; height: 18px; margin: 0; }
+  .product-opt .price { text-align: right; font-weight: 600; }
+  .product-opt .price small { display: block; font-weight: 400; color: var(--steel); font-size: .8rem; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .input {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--rule); border-radius: var(--radius);
+    padding: 11px 14px; font-size: 1rem;
+  }
+  .input:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 3px var(--brand-tint); }
+  textarea.input { min-height: 104px; resize: vertical; }
+
+  .segmented { display: inline-flex; border: 1.5px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+  .segmented label { position: relative; }
+  .segmented input { position: absolute; opacity: 0; inset: 0; }
+  .segmented span { display: block; padding: 10px 18px; cursor: pointer; border-left: 1px solid var(--rule); font-weight: 500; }
+  .segmented label:first-child span { border-left: 0; }
+  .segmented input:checked + span { background: var(--brand); color: #fff; }
+  .segmented input:focus-visible + span { outline: 3px solid var(--signal); outline-offset: -3px; }
+
+  .summary {
+    position: sticky; top: 24px;
+    background: var(--surface); border: 1px solid var(--rule); border-top: 4px solid var(--brand);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .summary h2 { margin-bottom: 16px; }
+  .summary dl { margin: 0; display: grid; grid-template-columns: 1fr auto; row-gap: 10px; }
+  .summary dt { padding-right: 16px; }
+  .summary dt { color: var(--steel); }
+  .summary dd { margin: 0; text-align: right; }
+  .summary .total { color: var(--ink); border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 4px; font-weight: 700; font-size: 1.15rem; }
+  .summary .fine { color: var(--steel); font-size: .85rem; margin: 16px 0 20px; }
+  .summary .btn { width: 100%; }
+
+  .error {
+    background: #FDECEA; color: var(--alert); border-left: 4px solid var(--alert);
+    padding: 12px 16px; border-radius: var(--radius); margin: 0 0 20px; font-weight: 500;
+  }
+
+  /* ---------- Confirmation ---------- */
+  .confirm { max-width: 720px; }
+  .confirm .ref-big { font-stretch: 120%; font-weight: 800; font-size: clamp(2.4rem, 1.5rem + 4vw, 4rem); letter-spacing: -0.03em; color: var(--brand); line-height: 1; margin: 20px 0 8px; }
+  .confirm .card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 24px; margin: 28px 0; }
+  .confirm .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* ---------- Sign in ---------- */
+  .signin-wrap { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .signin-art {
+    background: var(--brand-deep); color: #fff; padding: 48px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 64px);
+  }
+  .signin-art p { font-stretch: 112%; font-weight: 650; font-size: clamp(1.6rem, 1rem + 2vw, 2.4rem); line-height: 1.15; letter-spacing: -0.02em; max-width: 16ch; margin: 0; }
+  .signin-form { display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
+  .signin-form form { width: 100%; max-width: 380px; }
+  .signin-form h1 { font-size: 2rem; margin-bottom: 8px; }
+  .signin-form .lede { margin-bottom: 28px; }
+  .signin-form .btn { width: 100%; margin-top: 16px; }
+  .demo { margin-top: 24px; font-size: .85rem; color: var(--steel); }
+  .demo button { background: none; border: 0; padding: 0; color: var(--brand); text-decoration: underline; cursor: pointer; font-size: inherit; }
+
+  .loading { color: var(--steel); padding: 24px 0; }
+
+  @media (max-width: 860px) {
+    .quote-layout { grid-template-columns: 1fr; }
+    .summary { position: static; }
+    .request { grid-template-columns: 1fr; gap: 14px; }
+    .signin-wrap { grid-template-columns: 1fr; }
+    .signin-art { min-height: 200px; padding: 32px 24px; }
+    .who .name { display: none; }
+    nav.primary a { padding: 8px 6px; white-space: nowrap; font-size: .9rem; }
+    .linkbtn { white-space: nowrap; padding: 6px 10px; }
+    .topbar-inner { gap: 12px; }
+  }
+  @media (max-width: 560px) {
+    .row { grid-template-columns: 1fr; }
+    .brand span { display: none; }
+    .track li { font-size: .74rem; }
+    main { padding-top: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .request.is-new { animation: none; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <div class="eyebrow">LIVE FROM RENDER · PROXYING SALESFORCE</div>
-  <h1>Pipeline — fetched live, right now</h1>
-  <div id="status">Loading from /api/opportunities…</div>
-</header>
-<main>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Account</th><th>Opportunity</th><th>Stage</th><th style="text-align:right">Amount</th></tr></thead>
-      <tbody id="rows"></tbody>
-    </table>
+
+<!-- Sign-in screen -->
+<div id="signin" class="signin-wrap" hidden>
+  <div class="signin-art">
+    <a class="brand" href="#/" aria-label="Home"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M3 22 14 4l4 6.5L11 22z" fill="#fff"/><path d="M15 22l5.5-9L25 22z" fill="#D99A12"/></svg><span class="brand-name"></span></a>
+    <p>Orders, quotes and support for your plant, in one place.</p>
   </div>
-</main>
+  <div class="signin-form">
+    <form id="signin-form" novalidate>
+      <h1>Sign in</h1>
+      <p class="lede">Use the work email your account team has on file.</p>
+      <div id="signin-error" class="error" role="alert" hidden></div>
+      <label class="label" for="email">Work email</label>
+      <input class="input" id="email" name="email" type="email" autocomplete="email" required>
+      <button class="btn" type="submit">Sign in</button>
+      <p class="demo">Demo account: <button type="button" id="use-demo">tom.brennan@acme-mfg.example</button></p>
+    </form>
+  </div>
+</div>
+
+<!-- Signed-in app -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#/"><svg width="26" height="26" viewBox="0 0 28 28" aria-hidden="true"><path d="M3 22 14 4l4 6.5L11 22z" fill="#fff"/><path d="M15 22l5.5-9L25 22z" fill="#D99A12"/></svg><span class="brand-name"></span></a>
+      <nav class="primary" aria-label="Main">
+        <a href="#/" data-route="overview">My account</a>
+        <a href="#/quote" data-route="quote">Request a quote</a>
+      </nav>
+      <div class="who">
+        <div class="name"><span id="who-name"></span><small id="who-company"></small></div>
+        <button class="linkbtn" id="signout" type="button">Sign out</button>
+      </div>
+    </div>
+  </header>
+  <main id="view" tabindex="-1"></main>
+</div>
+
 <script>
-fetch("/api/opportunities")
-  .then(r => { if (!r.ok) throw new Error("API error " + r.status); return r.json(); })
-  .then(deals => {
-    document.getElementById("status").textContent = `Loaded ${deals.length} records live from Salesforce.`;
-    const tbody = document.getElementById("rows");
-    deals.forEach(d => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${d.Account?.Name ?? "—"}</td><td>${d.Name}</td><td>${d.StageName}</td>
-        <td class="amt">$${Number(d.Amount || 0).toLocaleString()}</td>`;
-      tbody.appendChild(tr);
-    });
-  })
-  .catch(err => {
-    document.getElementById("status").textContent = "Error: " + err.message;
+const state = { session: null, catalog: null, lastSubmitted: null, pollTimer: null };
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const money = (n) => "$" + Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const date = (d) => d ? new Date(d.length === 10 ? d + "T00:00:00" : d).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : "";
+
+async function api(path, options = {}) {
+  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, credentials: "same-origin", ...options });
+  if (res.status === 204) return null;
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(body.error || "Something went wrong. Try again.");
+    err.status = res.status;
+    throw err;
+  }
+  return body;
+}
+
+// ---------- Boot ----------
+(async function boot() {
+  try {
+    const { brand } = await api("/api/brand");
+    document.querySelectorAll(".brand-name").forEach((el) => (el.textContent = brand));
+    document.title = brand + " customer account";
+  } catch {}
+  try {
+    state.session = await api("/api/session");
+    showApp();
+  } catch {
+    showSignin();
+  }
+  window.addEventListener("hashchange", route);
+})();
+
+// ---------- Sign in ----------
+function showSignin() {
+  $("#app").hidden = true;
+  $("#signin").hidden = false;
+  $("#email").focus();
+}
+
+$("#use-demo").addEventListener("click", () => {
+  $("#email").value = "tom.brennan@acme-mfg.example";
+  $("#email").focus();
+});
+
+$("#signin-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = e.target.querySelector(".btn");
+  const errBox = $("#signin-error");
+  errBox.hidden = true;
+  btn.disabled = true;
+  btn.textContent = "Signing in…";
+  try {
+    state.session = await api("/api/session", { method: "POST", body: JSON.stringify({ email: $("#email").value }) });
+    location.hash = "#/";
+    showApp();
+  } catch (err) {
+    errBox.textContent = err.message;
+    errBox.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Sign in";
+  }
+});
+
+$("#signout").addEventListener("click", async () => {
+  await api("/api/session", { method: "DELETE" }).catch(() => {});
+  state.session = null;
+  stopPolling();
+  showSignin();
+});
+
+function showApp() {
+  $("#signin").hidden = true;
+  $("#app").hidden = false;
+  $("#who-name").textContent = state.session.name;
+  $("#who-company").textContent = state.session.company;
+  route();
+}
+
+// ---------- Router ----------
+function route() {
+  if (!state.session) return;
+  stopPolling();
+  const hash = location.hash || "#/";
+  const name = hash.startsWith("#/quote/sent") ? "sent" : hash.startsWith("#/quote") ? "quote" : "overview";
+  document.querySelectorAll("nav.primary a").forEach((a) => {
+    a.toggleAttribute("aria-current", a.dataset.route === (name === "sent" ? "quote" : name));
+    if (a.hasAttribute("aria-current")) a.setAttribute("aria-current", "page");
   });
+  ({ overview: renderOverview, quote: renderQuote, sent: renderSent })[name]();
+  window.scrollTo(0, 0);
+}
+
+function stopPolling() {
+  clearInterval(state.pollTimer);
+  state.pollTimer = null;
+}
+
+// ---------- Overview ----------
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+}
+
+function renderOverview() {
+  const s = state.session;
+  $("#view").innerHTML = `
+    <div class="page-head">
+      <div>
+        <h1>${greeting()}, ${esc(s.firstName)}.</h1>
+        <p class="lede">Here's where your quotes and support cases stand for ${esc(s.company)}.</p>
+      </div>
+      <a class="btn" href="#/quote">Request a quote</a>
+    </div>
+
+    <section class="section" aria-labelledby="req-h">
+      <div class="section-head">
+        <h2 id="req-h">Quote requests</h2>
+        <span class="meta" id="req-meta" aria-live="polite"></span>
+      </div>
+      <div id="requests"><p class="loading">Loading your quote requests…</p></div>
+    </section>
+
+    <section class="section" aria-labelledby="case-h">
+      <div class="section-head"><h2 id="case-h">Support cases</h2></div>
+      <div id="cases"><p class="loading">Loading your support cases…</p></div>
+    </section>`;
+
+  loadRequests();
+  loadCases();
+  // Refresh so an approval made elsewhere shows up here without a reload.
+  state.pollTimer = setInterval(loadRequests, 10000);
+}
+
+const STEPS = ["Submitted", "Under review", "Approved", "Quote sent"];
+const STEP_INDEX = { submitted: 0, in_review: 1, needs_discussion: 1, approved: 2, quote_sent: 3, ordered: 4 };
+const STATUS_NOTE = {
+  submitted: "Your account team has your request and will be in touch shortly.",
+  in_review: "Your requested discount is being reviewed.",
+  needs_discussion: "Your account team will call you to talk through pricing.",
+  approved: "Your pricing is approved. Your quote is being prepared.",
+  quote_sent: "Your quote is ready. Check your email or contact your account team.",
+  ordered: "Ordered. Thank you for your business.",
+  closed: "This request is closed.",
+};
+
+function trackHtml(status) {
+  if (status === "closed") return `<p class="meta">Closed</p>`;
+  const at = STEP_INDEX[status] ?? 0;
+  return `<ol class="track" aria-label="Request progress">${STEPS.map((label, i) => {
+    let cls = "";
+    let text = label;
+    if (i < at) cls = "done";
+    else if (i === at) cls = status === "needs_discussion" ? "flag" : status === "quote_sent" ? "done" : "current";
+    if (status === "ordered") cls = "done";
+    if (i === 1 && status === "needs_discussion") text = "Needs discussion";
+    const sr = i < at || cls === "done" ? " (complete)" : i === at ? " (current step)" : "";
+    return `<li class="${cls}">${esc(text)}<span class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">${sr}</span></li>`;
+  }).join("")}</ol>`;
+}
+
+async function loadRequests() {
+  const box = $("#requests");
+  if (!box) return;
+  try {
+    const items = await api("/api/requests");
+    $("#req-meta").textContent = "Updated " + new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    if (!items.length) {
+      box.innerHTML = `<div class="empty"><p>No quote requests yet. Request a quote and you can follow its progress here.</p><a class="btn secondary" href="#/quote">Request a quote</a></div>`;
+      return;
+    }
+    box.innerHTML = `<div class="requests">${items.map((r) => `
+      <article class="request${r.reference === state.lastSubmitted ? " is-new" : ""}">
+        <div>
+          <div class="ref">${esc(r.reference)}</div>
+          <div class="product">${esc(r.product)}</div>
+          <div class="facts">
+            <span>${money(r.listValue)} list</span>
+            ${r.discount ? `<span>${esc(r.discount)}% discount requested</span>` : ""}
+            <span>Submitted ${date(r.submittedAt)}</span>
+          </div>
+        </div>
+        ${trackHtml(r.status)}
+        <p class="status-note">${esc(STATUS_NOTE[r.status] || "")}</p>
+      </article>`).join("")}</div>`;
+    state.lastSubmitted = null;
+  } catch (err) {
+    if (err.status === 401) return showSignin();
+    box.innerHTML = `<div class="error" role="alert">${esc(err.message)}</div>`;
+  }
+}
+
+async function loadCases() {
+  const box = $("#cases");
+  try {
+    const cases = await api("/api/cases");
+    if (!cases.length) {
+      box.innerHTML = `<div class="empty"><p>No support cases. If something isn't working, your account team can open one for you.</p></div>`;
+      return;
+    }
+    box.innerHTML = `<div class="tablewrap"><table class="cases">
+      <thead><tr><th>Case</th><th>Subject</th><th>Priority</th><th>Status</th><th>Last update</th></tr></thead>
+      <tbody>${cases.map((c) => `
+        <tr>
+          <td class="num">${esc(c.number)}</td>
+          <td>${esc(c.subject)}</td>
+          <td class="${c.priority === "High" ? "prio-high" : ""}">${esc(c.priority)}</td>
+          <td><span class="pill ${c.isClosed ? "closed" : "open"}">${esc(c.status)}</span></td>
+          <td class="num">${date(c.updatedAt)}</td>
+        </tr>`).join("")}</tbody></table></div>`;
+  } catch (err) {
+    if (err.status === 401) return showSignin();
+    box.innerHTML = `<div class="error" role="alert">${esc(err.message)}</div>`;
+  }
+}
+
+// ---------- Quote form ----------
+async function renderQuote() {
+  $("#view").innerHTML = `<p class="loading">Loading products…</p>`;
+  try {
+    state.catalog = state.catalog || (await api("/api/catalog"));
+  } catch (err) {
+    if (err.status === 401) return showSignin();
+    $("#view").innerHTML = `<div class="error" role="alert">${esc(err.message)}</div>`;
+    return;
+  }
+  const { products, discounts } = state.catalog;
+  const minDate = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
+  $("#view").innerHTML = `
+    <div class="page-head">
+      <div>
+        <h1>Request a quote</h1>
+        <p class="lede">Tell us what you need. Your account team replies within one business day.</p>
+      </div>
+    </div>
+    <form id="quote-form" class="quote-layout" novalidate>
+      <div>
+        <div id="quote-error" class="error" role="alert" hidden></div>
+        <fieldset>
+          <legend>Product</legend>
+          <div class="products">
+            ${products.map((p, i) => `
+              <label class="product-opt">
+                <input type="radio" name="productId" value="${esc(p.id)}" ${i === 0 ? "checked" : ""}>
+                <span>${esc(p.name)}</span>
+                <span class="price">${money(p.price)}<small>${esc(p.unit)}</small></span>
+              </label>`).join("")}
+          </div>
+        </fieldset>
+
+        <div class="row">
+          <fieldset>
+            <label class="label" for="quantity">Quantity</label>
+            <input class="input" id="quantity" name="quantity" type="number" min="1" step="1" value="50" inputmode="numeric" required>
+          </fieldset>
+          <fieldset>
+            <label class="label" for="neededBy">Needed by</label>
+            <input class="input" id="neededBy" name="neededBy" type="date" min="${minDate}">
+          </fieldset>
+        </div>
+
+        <fieldset>
+          <legend>Requested discount</legend>
+          <p class="hint">Volume discounts are reviewed by your account team before your quote is issued.</p>
+          <div class="segmented" role="radiogroup">
+            ${discounts.map((d) => `
+              <label><input type="radio" name="discount" value="${d}" ${d === 0 ? "checked" : ""}><span>${d ? d + "%" : "None"}</span></label>`).join("")}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <label class="label" for="notes">Notes for your account team <span class="meta">(optional)</span></label>
+          <textarea class="input" id="notes" name="notes" maxlength="2000" placeholder="Site, delivery details, or anything that affects the quote"></textarea>
+        </fieldset>
+      </div>
+
+      <aside class="summary" aria-labelledby="sum-h">
+        <h2 id="sum-h">Your estimate</h2>
+        <dl>
+          <dt id="sum-line"></dt><dd id="sum-list"></dd>
+          <dt>Requested discount</dt><dd id="sum-disc"></dd>
+          <dt class="total">Estimated total</dt><dd class="total" id="sum-total"></dd>
+        </dl>
+        <p class="fine">Final pricing is confirmed in your quote.</p>
+        <button class="btn" type="submit">Submit quote request</button>
+      </aside>
+    </form>`;
+
+  const form = $("#quote-form");
+  const update = () => {
+    const data = new FormData(form);
+    const p = products.find((x) => x.id === data.get("productId"));
+    const qty = Math.max(parseInt(data.get("quantity"), 10) || 0, 0);
+    const disc = Number(data.get("discount") || 0);
+    const list = qty * p.price;
+    const off = Math.round(list * disc / 100);
+    $("#sum-line").textContent = `${qty.toLocaleString("en-US")} × ${p.name}`;
+    $("#sum-list").textContent = money(list);
+    $("#sum-disc").textContent = disc ? `−${money(off)} (${disc}%)` : "None";
+    $("#sum-total").textContent = money(list - off);
+  };
+  form.addEventListener("input", update);
+  update();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector(".btn");
+    const errBox = $("#quote-error");
+    errBox.hidden = true;
+    const data = Object.fromEntries(new FormData(form));
+    if (!(parseInt(data.quantity, 10) >= 1)) {
+      errBox.textContent = "Enter a quantity of 1 or more.";
+      errBox.hidden = false;
+      $("#quantity").focus();
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "Submitting…";
+    try {
+      const { reference } = await api("/api/requests", {
+        method: "POST",
+        body: JSON.stringify({ ...data, quantity: parseInt(data.quantity, 10), discount: Number(data.discount) }),
+      });
+      state.lastSubmitted = reference;
+      location.hash = "#/quote/sent/" + encodeURIComponent(reference);
+    } catch (err) {
+      if (err.status === 401) return showSignin();
+      errBox.textContent = err.message;
+      errBox.hidden = false;
+      errBox.scrollIntoView({ block: "center" });
+      btn.disabled = false;
+      btn.textContent = "Submit quote request";
+    }
+  });
+}
+
+// ---------- Confirmation ----------
+function renderSent() {
+  const reference = decodeURIComponent(location.hash.split("/").pop() || "");
+  $("#view").innerHTML = `
+    <div class="confirm">
+      <h1>Quote request submitted</h1>
+      <div class="ref-big">${esc(reference)}</div>
+      <p class="lede">Keep this reference for your records. We've sent it to your account team, and you can follow progress from your account.</p>
+      <div class="card">${trackHtml("submitted")}</div>
+      <div class="actions">
+        <a class="btn" href="#/">View my quote requests</a>
+        <a class="btn secondary" href="#/quote">Request another quote</a>
+      </div>
+    </div>`;
+  $("#view").focus();
+}
 </script>
 </body>
 </html>
