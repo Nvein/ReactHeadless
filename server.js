@@ -11,7 +11,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3001;
 const API_VERSION = process.env.SF_API_VERSION || "v66.0";
 const QUOTE_STAGE = process.env.QUOTE_STAGE || "Qualification";
-const BRAND_NAME = process.env.BRAND_NAME || "Kestrel Industrial";
+const BRAND_NAME = process.env.BRAND_NAME || "Headless 360";
 
 // ---------------------------------------------------------------------------
 // Product catalog shown on the quote form. Prices live here so the customer
